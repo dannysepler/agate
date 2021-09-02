@@ -2,9 +2,9 @@
 
 import locale
 from datetime import date, datetime, time
+from functools import lru_cache
 
 import parsedatetime
-import six
 
 from agate.data_types.base import DataType
 from agate.exceptions import CastError
@@ -52,6 +52,7 @@ class Date(DataType):
         self._constants = parsedatetime.Constants(localeID=self.locale)
         self._parser = parsedatetime.Calendar(constants=self._constants, version=parsedatetime.VERSION_CONTEXT_STYLE)
 
+    @lru_cache(maxsize=10000)
     def cast(self, d):
         """
         Cast a single value to a :class:`datetime.date`.
@@ -64,7 +65,7 @@ class Date(DataType):
         """
         if type(d) is date or d is None:
             return d
-        elif isinstance(d, six.string_types):
+        elif isinstance(d, str):
             d = d.strip()
 
             if d.lower() in self.null_values:

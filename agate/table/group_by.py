@@ -15,7 +15,7 @@ def group_by(self, key, key_name=None, key_type=None):
     format of the input column.
 
     :param key:
-        Either the name of a column from the this table to group by, or a
+        Either the name of a column from the table to group by, or a
         :class:`function` that takes a row and returns a value to group by.
     :param key_name:
         A name that describes the grouped properties. Defaults to the
@@ -35,7 +35,7 @@ def group_by(self, key, key_name=None, key_type=None):
         key_name = key_name or 'group'
         key_type = key_type or Text()
     else:
-        column = self._columns[key]
+        column = self.get_column(key)
 
         key_name = key_name or column.name
         key_type = key_type or column.data_type
@@ -46,7 +46,7 @@ def group_by(self, key, key_name=None, key_type=None):
         if key_is_row_function:
             group_name = key(row)
         else:
-            group_name = row[column.name]
+            group_name = row.by_string(column.name)
 
         group_name = key_type.cast(group_name)
 

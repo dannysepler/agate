@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-
 import datetime
 import locale
 
 import isodate
 import parsedatetime
-import six
 
 from agate.data_types.base import DataType
 from agate.exceptions import CastError
@@ -26,7 +24,7 @@ class DateTime(DataType):
         for parsing formatted datetimes.
     """
     def __init__(self, datetime_format=None, timezone=None, locale=None, **kwargs):
-        super(DateTime, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.datetime_format = datetime_format
         self.timezone = timezone
@@ -73,7 +71,7 @@ class DateTime(DataType):
             return d
         elif isinstance(d, datetime.date):
             return datetime.datetime.combine(d, datetime.time(0, 0, 0))
-        elif isinstance(d, six.string_types):
+        elif isinstance(d, str):
             d = d.strip()
 
             if d.lower() in self.null_values:

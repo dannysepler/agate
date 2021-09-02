@@ -21,10 +21,10 @@ rows, row names are optional.)
 
 import sys
 import warnings
+from functools import lru_cache
 from itertools import chain
 
 import six
-from six.moves import range  # pylint: disable=W0622
 
 from agate import utils
 from agate.columns import Column
@@ -76,7 +76,7 @@ class Table(object):
         assumed to be :class:`.Row` instances, rather than raw data.
     """
     def __init__(self, rows, column_names=None, column_types=None, row_names=None, _is_fork=False):
-        if isinstance(rows, six.string_types):
+        if isinstance(rows, str):
             raise ValueError('When created directly, the first argument to Table must be a sequence of rows. '
                              'Did you want agate.Table.from_csv?')
 
@@ -142,7 +142,7 @@ class Table(object):
         if row_names:
             computed_row_names = []
 
-            if isinstance(row_names, six.string_types):
+            if isinstance(row_names, str):
                 for row in new_rows:
                     name = row[row_names]
                     computed_row_names.append(name)
@@ -209,21 +209,21 @@ class Table(object):
     @property
     def column_types(self):
         """
-        An tuple :class:`.DataType` instances.
+        A tuple :class:`.DataType` instances.
         """
         return self._column_types
 
     @property
     def column_names(self):
         """
-        An tuple of strings.
+        A tuple of strings.
         """
         return self._column_names
 
     @property
     def row_names(self):
         """
-        An tuple of strings, if this table has row names.
+        A tuple of strings, if this table has row names.
 
         If this table does not have row names, then :code:`None`.
         """
@@ -236,6 +236,19 @@ class Table(object):
         :class:`.Column` instances for values.
         """
         return self._columns
+
+    @lru_cache(maxsize=1000)
+    def get_column(self, key):
+        """
+        A cached manner to get a column by a given key. Calling the
+        `self.columns[key]` directly is slow and not cacheable, so
+        this is a way to get around that.
+        """
+        try:
+            return self.columns.by_string(key)
+        except KeyError:
+            return self.columns.by_index(key)
+            # return self.columns[key]
 
     @property
     def rows(self):

@@ -57,7 +57,7 @@ def compute(self, computations, replace=False):
                 if column_name in new_columns:
                     values.append(new_columns[column_name][i])
                 else:
-                    values.append(row[j])
+                    values.append(row.by_index(j))
         # Faster version if not using replace
         else:
             values = row.values() + tuple(c[i] for c in new_columns.values())

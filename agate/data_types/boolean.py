@@ -5,16 +5,16 @@ try:
 except ImportError:  # pragma: no cover
     from decimal import Decimal
 
-import six
+from functools import lru_cache
 
 from agate.data_types.base import DEFAULT_NULL_VALUES, DataType
 from agate.exceptions import CastError
 
 #: Default values which will be automatically cast to :code:`True`.
-DEFAULT_TRUE_VALUES = ('yes', 'y', 'true', 't', '1')
+DEFAULT_TRUE_VALUES = set(['yes', 'y', 'true', 't', '1'])
 
 #: Default values which will be automatically cast to :code:`False`.
-DEFAULT_FALSE_VALUES = ('no', 'n', 'false', 'f', '0')
+DEFAULT_FALSE_VALUES = set(['no', 'n', 'false', 'f', '0'])
 
 
 class Boolean(DataType):
@@ -31,11 +31,12 @@ class Boolean(DataType):
     """
     def __init__(self, true_values=DEFAULT_TRUE_VALUES, false_values=DEFAULT_FALSE_VALUES,
                  null_values=DEFAULT_NULL_VALUES):
-        super(Boolean, self).__init__(null_values=null_values)
+        super().__init__(null_values=null_values)
 
         self.true_values = true_values
         self.false_values = false_values
 
+    @lru_cache(maxsize=1000)
     def cast(self, d):
         """
         Cast a single value to :class:`bool`.
@@ -45,14 +46,16 @@ class Boolean(DataType):
         """
         if d is None:
             return d
-        elif type(d) is bool and type(d) is not int:
+
+        t = type(d)
+        if t is bool and t is not int:
             return d
-        elif type(d) is int or isinstance(d, Decimal):
+        elif t is int or isinstance(d, Decimal):
             if d == 1:
                 return True
             elif d == 0:
                 return False
-        elif isinstance(d, six.string_types):
+        elif isinstance(d, str):
             d = d.replace(',', '').strip()
 
             d_lower = d.lower()

@@ -2,7 +2,6 @@
 # -*- coding: utf8 -*-
 
 import datetime
-import sys
 import warnings
 from decimal import Decimal
 
@@ -766,34 +765,6 @@ class TestTextAggregation(unittest.TestCase):
     def test_max_length_all_nulls(self):
         self.assertEqual(MaxLength('null').run(self.table), 0)
 
-    def test_max_length_unicode(self):
-        """
-        This text documents different handling of wide-unicode characters in
-        Python 2 and Python 3. The former's behavior is broken, but can not
-        be easily fixed.
-
-        Bug: https://github.com/wireservice/agate/issues/649
-        Reference: http://stackoverflow.com/a/35462951
-        """
-        rows = [
-            ['a'],
-            [u'👍'],
-            ['w']
-        ]
-
-        table = Table(rows, ['test'], [Text()])
-
-        MaxLength('test').validate(table)
-
-        # Non 4-byte versions of Python 2 (but not PyPy)
-        if sys.maxunicode <= 65535:
-            self.assertEqual(MaxLength('test').run(table), 2)
-        # Modern versions of Python
-        else:
-            self.assertEqual(MaxLength('test').run(table), 1)
-
-        self.assertIsInstance(MaxLength('test').run(table), Decimal)
-
     def test_max_length_invalid(self):
         rows = [
             [1],
@@ -805,3 +776,9 @@ class TestTextAggregation(unittest.TestCase):
 
         with self.assertRaises(DataTypeError):
             MaxLength('test').validate(table)
+
+    def test_max_length_only_nulls(self):
+        rows = [[None]]
+        table = Table(rows, ['test'], [Text()])
+
+        self.assertEqual(MaxLength('test').run(table), 0)

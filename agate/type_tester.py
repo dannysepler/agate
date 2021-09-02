@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import warnings
-from copy import copy
 
 from agate.data_types.base import DEFAULT_NULL_VALUES
 from agate.data_types.boolean import Boolean
@@ -62,10 +61,10 @@ class TypeTester(object):
         self._force = force
         self._limit = limit
 
+        # In order of preference
         if types:
             self._possible_types = types
         else:
-            # In order of preference
             self._possible_types = [
                 Boolean(null_values=null_values),
                 Number(null_values=null_values),
@@ -84,7 +83,8 @@ class TypeTester(object):
             The data as a sequence of any sequences: tuples, lists, etc.
         """
         num_columns = len(column_names)
-        hypotheses = [set(self._possible_types) for i in range(num_columns)]
+        possible_types = {str(t): t for t in self._possible_types}
+        hypotheses = [set(possible_types.keys()) for i in range(num_columns)]
         force_indices = []
 
         for name in self._force.keys():
@@ -108,12 +108,15 @@ class TypeTester(object):
 
                 h = hypotheses[i]
 
-                if len(h) == 1:
+                if len(h) == 1 or len(row) <= i:
                     continue
 
-                for column_type in copy(h):
-                    if len(row) > i and not column_type.test(row[i]):
-                        h.remove(column_type)
+                to_remove = []
+                for column_type in h:
+                    if not possible_types[column_type].test(row[i]):
+                        to_remove.append(column_type)
+                for t in to_remove:
+                    h.remove(t)
 
         column_types = []
 
@@ -125,8 +128,8 @@ class TypeTester(object):
             h = hypotheses[i]
 
             # Select in prefer order
-            for t in self._possible_types:
-                if t in h:
+            for k, t in possible_types.items():
+                if k in h:
                     column_types.append(t)
                     break
 

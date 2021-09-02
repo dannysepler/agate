@@ -16,7 +16,7 @@ class PercentileRank(Rank):
         The name of a column containing the :class:`.Number` values.
     """
     def validate(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         if not isinstance(column.data_type, Number):
             raise DataTypeError('PercentileRank column must contain Number data.')
@@ -31,6 +31,6 @@ class PercentileRank(Rank):
         new_column = []
 
         for row in table.rows:
-            new_column.append(percentiles.locate(row[self._column_name]))
+            new_column.append(percentiles.locate(row.by_string(self._column_name)))
 
         return new_column

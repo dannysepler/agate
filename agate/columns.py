@@ -6,14 +6,8 @@ array of tabular data. Whereas :class:`.Row` instances are independent of their
 parent :class:`.Table`, columns depend on knowledge of both their position in
 the parent (column name, data type) as well as the rows that contain their data.
 """
-import six
-
 from agate.mapped_sequence import MappedSequence
 from agate.utils import NullOrder, memoize
-
-if six.PY3:  # pragma: no cover
-    # pylint: disable=W0622
-    xrange = range
 
 
 def null_handler(k):
@@ -107,28 +101,35 @@ class Column(MappedSequence):
         """
         Get the values in this column, as a tuple.
         """
-        return tuple(row[self._index] for row in self._rows)
+        return tuple(row.by_index(self._index) for row in self._rows)
+
+    def itervalues(self):
+        """
+        Get the values in this column, as a generator.
+        """
+        for row in self._rows:
+            yield row.by_index(self._index)
 
     @memoize
     def values_distinct(self):
         """
         Get the distinct values in this column, as a tuple.
         """
-        return tuple(set(self.values()))
+        return tuple(set(self.itervalues()))
 
     @memoize
     def values_without_nulls(self):
         """
         Get the values in this column with any null values removed.
         """
-        return tuple(d for d in self.values() if d is not None)
+        return tuple(d for d in self.itervalues() if d is not None)
 
     @memoize
     def values_sorted(self):
         """
         Get the values in this column sorted.
         """
-        return sorted(self.values(), key=null_handler)
+        return sorted(self.itervalues(), key=null_handler)
 
     @memoize
     def values_without_nulls_sorted(self):

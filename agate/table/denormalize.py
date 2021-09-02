@@ -8,8 +8,6 @@ try:
 except ImportError:  # pragma: no cover
     from decimal import Decimal
 
-import six
-
 from agate import utils
 from agate.data_types import Number
 from agate.rows import Row
@@ -86,12 +84,12 @@ def denormalize(self, key=None, property_column='property', value_column='value'
     row_data = OrderedDict()
 
     for row in self.rows:
-        row_key = tuple(row[k] for k in key)
+        row_key = tuple(row.by_string(k) for k in key)
 
         if row_key not in row_data:
             row_data[row_key] = OrderedDict()
 
-        f = six.text_type(row[property_column])
+        f = str(row.by_string(property_column))
         v = row[value_column]
 
         if f not in field_names:

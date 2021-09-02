@@ -28,7 +28,7 @@ class Summary(Aggregation):
         return self._data_type
 
     def run(self, table):
-        v = self._func(table.columns[self._column_name])
+        v = self._func(table.get_column(self._column_name))
 
         if self._cast:
             v = self._data_type.cast(v)

@@ -25,7 +25,7 @@ class MaxLength(Aggregation):
         return Number()
 
     def validate(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         if not isinstance(column.data_type, Text):
             raise DataTypeError('MaxLength can only be applied to columns containing Text data.')
@@ -35,9 +35,9 @@ class MaxLength(Aggregation):
         :returns:
             :class:`int`.
         """
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
-        lens = [len(d) for d in column.values_without_nulls()]
+        lens = tuple(len(d) for d in column.values_without_nulls())
 
         if not lens:
             return Decimal('0')

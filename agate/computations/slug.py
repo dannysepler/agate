@@ -35,7 +35,7 @@ class Slug(Computation):
             column_names = [self._column_name]
 
         for column_name in column_names:
-            column = table.columns[column_name]
+            column = table.get_column(column_name)
 
             if not isinstance(column.data_type, Text):
                 raise DataTypeError('Slug column must contain Text data.')
@@ -54,10 +54,10 @@ class Slug(Computation):
             if issequence(self._column_name):
                 column_value = ''
                 for column_name in self._column_name:
-                    column_value = column_value + ' ' + row[column_name]
+                    column_value = column_value + ' ' + row.by_string(column_name)
 
                 new_column.append(column_value)
             else:
-                new_column.append(row[self._column_name])
+                new_column.append(row.by_string(self._column_name))
 
         return slugify(new_column, ensure_unique=self._ensure_unique, **self._slug_args)

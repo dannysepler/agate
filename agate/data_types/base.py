@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-
-import six
+from functools import lru_cache
 
 from agate.exceptions import CastError
 
 #: Default values which will be automatically cast to :code:`None`
-DEFAULT_NULL_VALUES = ('', 'na', 'n/a', 'none', 'null', '.')
+DEFAULT_NULL_VALUES = set(['', 'na', 'n/a', 'none', 'null', '.'])
 
 
-class DataType(object):  # pragma: no cover
+class DataType:  # pragma: no cover
     """
     Specifies how values should be parsed when creating a :class:`.Table`.
 
@@ -18,6 +17,7 @@ class DataType(object):  # pragma: no cover
     def __init__(self, null_values=DEFAULT_NULL_VALUES):
         self.null_values = null_values
 
+    @lru_cache(maxsize=1000)
     def test(self, d):
         """
         Test, for purposes of type inference, if a value could possibly be
@@ -45,7 +45,7 @@ class DataType(object):  # pragma: no cover
         if d is None:
             return None
 
-        return six.text_type(d)
+        return str(d)
 
     def jsonify(self, d):
         """
@@ -54,4 +54,4 @@ class DataType(object):  # pragma: no cover
         if d is None:
             return None
 
-        return six.text_type(d)
+        return str(d)

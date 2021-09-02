@@ -87,7 +87,7 @@ class Writer(object):
             self._append_line_number(row)
 
         # Convert embedded Mac line endings to unix style line endings so they get quoted
-        row = [i.replace('\r', '\n') if isinstance(i, six.string_types) else i for i in row]
+        row = [i.replace('\r', '\n') if isinstance(i, str) else i for i in row]
 
         self.writer.writerow(row)
 
@@ -129,7 +129,7 @@ class DictWriter(csv.DictWriter):
 
     def writerow(self, row):
         # Convert embedded Mac line endings to unix style line endings so they get quoted
-        row = dict([(k, v.replace('\r', '\n')) if isinstance(v, six.string_types) else (k, v) for k, v in row.items()])
+        row = dict([(k, v.replace('\r', '\n')) if isinstance(v, str) else (k, v) for k, v in row.items()])
 
         if self.line_numbers:
             self._append_line_number(row)

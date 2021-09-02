@@ -24,8 +24,8 @@ class PercentChange(Computation):
         return Number()
 
     def validate(self, table):
-        before_column = table.columns[self._before_column_name]
-        after_column = table.columns[self._after_column_name]
+        before_column = table.get_column(self._before_column_name)
+        after_column = table.get_column(self._after_column_name)
 
         if not isinstance(before_column.data_type, Number):
             raise DataTypeError('PercentChange before column must contain Number data.')
@@ -47,8 +47,8 @@ class PercentChange(Computation):
         new_column = []
 
         for row in table.rows:
-            before = row[self._before_column_name]
-            after = row[self._after_column_name]
+            before = row.by_string(self._before_column_name)
+            after = row.by_string(self._after_column_name)
 
             if before is not None and after is not None:
                 new_column.append((after - before) / before * 100)

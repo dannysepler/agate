@@ -27,14 +27,12 @@ class All(Aggregation):
         return Boolean()
 
     def validate(self, table):
-        table.columns[self._column_name]
+        table.get_column(self._column_name)
 
     def run(self, table):
         """
         :returns:
             :class:`bool`
         """
-        column = table.columns[self._column_name]
-        data = column.values()
-
-        return all(self._test(d) for d in data)
+        column = table.get_column(self._column_name)
+        return all(self._test(v) for v in column.itervalues())

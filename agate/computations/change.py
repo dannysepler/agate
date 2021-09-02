@@ -25,7 +25,7 @@ class Change(Computation):
         self._after_column_name = after_column_name
 
     def get_computed_data_type(self, table):
-        before_column = table.columns[self._before_column_name]
+        before_column = table.get_column(self._before_column_name)
 
         if isinstance(before_column.data_type, (Date, DateTime, TimeDelta)):
             return TimeDelta()
@@ -33,8 +33,8 @@ class Change(Computation):
             return Number()
 
     def validate(self, table):
-        before_column = table.columns[self._before_column_name]
-        after_column = table.columns[self._after_column_name]
+        before_column = table.get_column(self._before_column_name)
+        after_column = table.get_column(self._after_column_name)
 
         for data_type in (Number, Date, DateTime, TimeDelta):
             if isinstance(before_column.data_type, data_type):
@@ -56,8 +56,8 @@ class Change(Computation):
         new_column = []
 
         for row in table.rows:
-            before = row[self._before_column_name]
-            after = row[self._after_column_name]
+            before = row.by_string(self._before_column_name)
+            after = row.by_string(self._after_column_name)
 
             if before is not None and after is not None:
                 new_column.append(after - before)

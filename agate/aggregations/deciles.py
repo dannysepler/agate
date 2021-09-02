@@ -29,7 +29,7 @@ class Deciles(Aggregation):
         self._column_name = column_name
 
     def validate(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         if not isinstance(column.data_type, Number):
             raise DataTypeError('Deciles can only be applied to columns containing Number data.')

@@ -29,9 +29,10 @@ class Count(Aggregation):
 
     def run(self, table):
         if self._column_name is not None:
+            column = table.get_column(self._column_name)
             if self._value is not default:
-                return table.columns[self._column_name].values().count(self._value)
+                return column.values().count(self._value)
             else:
-                return len(table.columns[self._column_name].values_without_nulls())
+                return len(column.values_without_nulls())
         else:
             return len(table.rows)

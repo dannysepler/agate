@@ -6,10 +6,8 @@ try:
 except ImportError:  # pragma: no cover
     from decimal import Decimal, InvalidOperation
 
-import warnings
-
-import six
-from babel.core import Locale
+import locale as pylocale
+from functools import lru_cache
 
 from agate.data_types.base import DataType
 from agate.exceptions import CastError
@@ -40,20 +38,25 @@ class Number(DataType):
     """
     def __init__(self, locale='en_US', group_symbol=None, decimal_symbol=None,
                  currency_symbols=DEFAULT_CURRENCY_SYMBOLS, **kwargs):
-        super(Number, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
-        self.locale = Locale.parse(locale)
-
+        self.locale = locale
+        pylocale.setlocale(pylocale.LC_ALL, self.locale)
         self.currency_symbols = currency_symbols
 
-        # Suppress Babel warning on Python 3.6
-        # See #665
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        conv = pylocale.localeconv()
+        self.group_symbol = (
+            group_symbol or
+            conv['thousands_sep'] or
+            conv['mon_thousands_sep'] or ','
+        )
+        self.decimal_symbol = (
+            decimal_symbol or
+            conv['decimal_point'] or
+            conv['mon_decimal_sep'] or '.'
+        )
 
-            self.group_symbol = group_symbol or self.locale.number_symbols.get('group', ',')
-            self.decimal_symbol = decimal_symbol or self.locale.number_symbols.get('decimal', '.')
-
+    @lru_cache(maxsize=10000)
     def cast(self, d):
         """
         Cast a single value to a :class:`decimal.Decimal`.
@@ -61,22 +64,19 @@ class Number(DataType):
         :returns:
             :class:`decimal.Decimal` or :code:`None`.
         """
-        if isinstance(d, Decimal) or d is None:
-            return d
+        if d is None:
+            return None
 
         t = type(d)
 
-        if t is int:
+        try:
+            if t is float:
+                d = repr(d)
             return Decimal(d)
-        elif six.PY2 and t is long:  # noqa: F821
-            return Decimal(d)
-        elif t is float:
-            return Decimal(repr(d))
-        elif d is False:
-            return Decimal(0)
-        elif d is True:
-            return Decimal(1)
-        elif not isinstance(d, six.string_types):
+        except (InvalidOperation, TypeError):
+            pass
+
+        if t is not str:
             raise CastError('Can not parse value "%s" as Decimal.' % d)
 
         d = d.strip()

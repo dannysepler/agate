@@ -19,19 +19,19 @@ class Min(Aggregation):
         self._column_name = column_name
 
     def get_aggregate_data_type(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         if isinstance(column.data_type, (Date, DateTime, Number, TimeDelta)):
             return column.data_type
 
     def validate(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         if not isinstance(column.data_type, (Date, DateTime, Number, TimeDelta)):
             raise DataTypeError('Min can only be applied to columns containing DateTime, Date or Number data.')
 
     def run(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         data = column.values_without_nulls()
         if data:

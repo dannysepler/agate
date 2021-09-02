@@ -68,6 +68,6 @@ class Rank(Computation):
         new_column = []
 
         for row in table.rows:
-            new_column.append(ranks[row[self._column_name]])
+            new_column.append(ranks[row.by_string(self._column_name)])
 
         return new_column

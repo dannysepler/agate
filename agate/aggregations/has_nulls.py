@@ -18,4 +18,5 @@ class HasNulls(Aggregation):
         return Boolean()
 
     def run(self, table):
-        return None in table.columns[self._column_name].values()
+        column = table.get_column(self._column_name)
+        return any(value is None for value in column.itervalues())

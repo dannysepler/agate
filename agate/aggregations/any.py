@@ -27,10 +27,8 @@ class Any(Aggregation):
         return Boolean()
 
     def validate(self, table):
-        table.columns[self._column_name]
+        table.get_column(self._column_name)
 
     def run(self, table):
-        column = table.columns[self._column_name]
-        data = column.values()
-
-        return any(self._test(d) for d in data)
+        column = table.get_column(self._column_name)
+        return any(self._test(v) for v in column.itervalues())

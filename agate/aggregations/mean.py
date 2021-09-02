@@ -23,7 +23,7 @@ class Mean(Aggregation):
         return Number()
 
     def validate(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         if not isinstance(column.data_type, Number):
             raise DataTypeError('Mean can only be applied to columns containing Number data.')
@@ -34,7 +34,7 @@ class Mean(Aggregation):
             warn_null_calculation(self, column)
 
     def run(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
         data = column.values_without_nulls()
         if data:
             sum_total = self._sum.run(table)

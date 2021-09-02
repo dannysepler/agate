@@ -214,7 +214,7 @@ class TestTypeTester(unittest.TestCase):
             ('',)
         ]
 
-        tester = TypeTester(types=[Number(locale='de_DE.UTF-8'), Text()])
+        tester = TypeTester(types=[Number(locale='de_DE'), Text()])
         inferred = tester.run(rows, ['one'])
 
         self.assertIsInstance(inferred[0], Number)

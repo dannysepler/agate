@@ -65,7 +65,7 @@ class UnicodeReader(object):
             else:
                 row.insert(0, str(self.line_num - 1 if self.header else self.line_num))
 
-        return [six.text_type(s, 'utf-8') for s in row]
+        return (str(s) for s in row)
 
     def __iter__(self):
         return self

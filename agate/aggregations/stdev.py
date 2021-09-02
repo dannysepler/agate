@@ -25,7 +25,7 @@ class StDev(Aggregation):
         return Number()
 
     def validate(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         if not isinstance(column.data_type, Number):
             raise DataTypeError('StDev can only be applied to columns containing Number data.')
@@ -58,7 +58,7 @@ class PopulationStDev(StDev):
         return Number()
 
     def validate(self, table):
-        column = table.columns[self._column_name]
+        column = table.get_column(self._column_name)
 
         if not isinstance(column.data_type, Number):
             raise DataTypeError('PopulationStDev can only be applied to columns containing Number data.')

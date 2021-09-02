@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import six
+from functools import lru_cache
 
 from agate.data_types.base import DataType
 
@@ -14,23 +14,25 @@ class Text(DataType):
         converted to `None`. Disable to retain them as strings.
     """
     def __init__(self, cast_nulls=True, **kwargs):
-        super(Text, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.cast_nulls = cast_nulls
 
+    @lru_cache(maxsize=1000)
     def cast(self, d):
         """
-        Cast a single value to :func:`unicode` (:func:`str` in Python 3).
+        Cast a single value to :func:`str`
 
         :param d:
             A value to cast.
         :returns:
-            :func:`unicode` (:func:`str` in Python 3) or :code:`None`
+            :func:`str` or :code:`None`
         """
         if d is None:
             return d
-        elif isinstance(d, six.string_types):
+        elif isinstance(d, str):
             if self.cast_nulls and d.strip().lower() in self.null_values:
                 return None
+            return d
 
-        return six.text_type(d)
+        return str(d)
